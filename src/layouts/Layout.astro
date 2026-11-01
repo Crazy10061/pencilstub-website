@@ -1,5 +1,13 @@
 ---
+import Footer from '../components/Footer.astro';
 import TopBar from '../components/TopBar.astro';
+
+interface Props {
+	sourceUrl?: string;
+	footerVariant?: 'light' | 'dark' | 'minimal';
+}
+
+const { sourceUrl, footerVariant } = Astro.props;
 ---
 
 <!doctype html>
@@ -15,6 +23,7 @@ import TopBar from '../components/TopBar.astro';
 	<body>
 		<TopBar />
 		<slot />
+		<Footer sourceUrl={sourceUrl} variant={footerVariant} />
 	</body>
 </html>
 

@@ -1,0 +1,65 @@
+---
+export interface Props {
+	sourceUrl?: string;
+	variant?: 'light' | 'dark' | 'minimal';
+}
+
+const defaultRepo = 'https://github.com/tomatopotato17265/website';
+
+const { sourceUrl = defaultRepo, variant = 'light' } = Astro.props;
+---
+
+<footer class={`footer footer--${variant}`}>
+	<p>
+		This page is <a href={sourceUrl} target="_blank" rel="noopener noreferrer">open source</a>. Made
+		with ❤️ by pencil stub.
+	</p>
+</footer>
+
+<style>
+	.footer {
+		padding: 1.25rem 1.5rem;
+		text-align: center;
+		font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+		font-size: 0.9rem;
+	}
+
+	.footer p {
+		margin: 0;
+	}
+
+	.footer a {
+		font-weight: 600;
+		text-underline-offset: 2px;
+	}
+
+	.footer--light {
+		background: #fff;
+		color: #111827;
+		border-top: 1px solid rgba(17, 24, 39, 0.1);
+	}
+
+	.footer--light a {
+		color: #111827;
+	}
+
+	.footer--dark {
+		background: #111827;
+		color: #e5e7eb;
+	}
+
+	.footer--dark a {
+		color: #fff;
+	}
+
+	.footer--minimal {
+		background: transparent;
+		color: #6b7280;
+		font-size: 0.8rem;
+	}
+
+	.footer--minimal a {
+		color: inherit;
+		font-weight: 400;
+	}
+</style>
