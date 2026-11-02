@@ -1,0 +1,37 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "website",
+	"main": "./src/worker.ts",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": ["nodejs_compat"],
+
+	// Every hostname served by this Worker (Cloudflare creates the DNS records on deploy).
+	// Add a line here when you add a site to SITES in src/worker.ts.
+	"routes": [
+		{ "pattern": "pencilstub.dev", "custom_domain": true },
+		{ "pattern": "mouldyshoe.pencilstub.dev", "custom_domain": true }
+	],
+
+	// Mouldy Shoe: cached YouTube stats (same namespace the standalone mouldyshoe Worker used).
+	"kv_namespaces": [
+		{
+			"binding": "STATS_KV",
+			"id": "31785cecfadf480b8cb71073e38af916",
+			"remote": true
+		}
+	],
+	// Mouldy Shoe: refresh the YouTube stats every 10 minutes.
+	"triggers": {
+		"crons": ["*/10 * * * *"]
+	},
+
+	// Run the Worker before static assets so it can rewrite <site>.pencilstub.dev -> /<group>/ paths.
+	"assets": {
+		"binding": "ASSETS",
+		"run_worker_first": true
+	},
+
+	"observability": {
+		"enabled": true
+	}
+}

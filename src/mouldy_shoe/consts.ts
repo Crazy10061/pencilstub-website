@@ -4,6 +4,9 @@ import type { SocialLink } from '../shared/TopBar.astro';
 export const SOURCE_URL =
 	'https://github.com/tomatopotato17265/website/tree/main/src/pages/mouldy_shoe';
 
+/** Public origin of this site (it is served from its own subdomain). */
+export const SITE_URL = 'https://mouldyshoe.pencilstub.dev';
+
 export const SITE_TITLE = 'Mouldy Shoe';
 export const SITE_DESCRIPTION = '';
 

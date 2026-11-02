@@ -1,8 +1,12 @@
 // @ts-check
+import cloudflare from '@astrojs/cloudflare';
 import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
+	// Pages are prerendered (see `export const prerender = true`); the Worker (src/worker.ts) routes by hostname.
+	output: 'server',
+	adapter: cloudflare(),
 	fonts: [
 		// Mouldy Shoe site (src/pages/mouldy_shoe). Only pages that render <Font /> load it.
 		{

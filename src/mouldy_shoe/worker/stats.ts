@@ -1,7 +1,4 @@
-/// <reference types="@cloudflare/workers-types" />
-
-interface Env {
-	ASSETS: Fetcher;
+export interface StatsEnv {
 	STATS_KV: KVNamespace;
 	YOUTUBE_API_KEY: string;
 	YOUTUBE_CHANNEL_HANDLE?: string;
@@ -25,7 +22,7 @@ const TTL_MS = 10 * 60 * 1000;
 
 type ChannelInfo = Pick<Stats, 'subscribers' | 'videos'> & { uploadsPlaylistId: string | null };
 
-async function fetchChannel(env: Env): Promise<ChannelInfo> {
+async function fetchChannel(env: StatsEnv): Promise<ChannelInfo> {
 	const handle = (env.YOUTUBE_CHANNEL_HANDLE ?? 'mouldy_shoe').replace(/^@/, '');
 	const url =
 		'https://www.googleapis.com/youtube/v3/channels' +
@@ -53,7 +50,7 @@ async function fetchChannel(env: Env): Promise<ChannelInfo> {
 	}
 }
 
-async function fetchLatestVideo(uploadsPlaylistId: string, env: Env): Promise<LatestVideo | null> {
+async function fetchLatestVideo(uploadsPlaylistId: string, env: StatsEnv): Promise<LatestVideo | null> {
 	const url =
 		'https://www.googleapis.com/youtube/v3/playlistItems' +
 		'?part=snippet&maxResults=1' +
@@ -91,7 +88,7 @@ function toCount(raw: string | undefined): number | null {
 	return Number.isFinite(n) ? n : null;
 }
 
-async function refresh(env: Env): Promise<Stats> {
+async function refresh(env: StatsEnv): Promise<Stats> {
 	const previous = await env.STATS_KV.get<Stats>(KV_KEY, 'json');
 	const channel = await fetchChannel(env);
 	const latestVideo = channel.uploadsPlaylistId
@@ -108,7 +105,7 @@ async function refresh(env: Env): Promise<Stats> {
 	return stats;
 }
 
-async function getStats(env: Env, ctx: ExecutionContext): Promise<Stats> {
+async function getStats(env: StatsEnv, ctx: ExecutionContext): Promise<Stats> {
 	const cached = await env.STATS_KV.get<Stats>(KV_KEY, 'json');
 	if (!cached) return refresh(env);
 
@@ -118,21 +115,15 @@ async function getStats(env: Env, ctx: ExecutionContext): Promise<Stats> {
 	return cached;
 }
 
-export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		const { pathname } = new URL(request.url);
+/** Handles GET /api/stats for the Mouldy Shoe site. */
+export async function handleStatsRequest(env: StatsEnv, ctx: ExecutionContext): Promise<Response> {
+	const stats = await getStats(env, ctx);
+	return Response.json(stats, {
+		headers: { 'cache-control': 'public, max-age=60' },
+	});
+}
 
-		if (pathname === '/api/stats') {
-			const stats = await getStats(env, ctx);
-			return Response.json(stats, {
-				headers: { 'cache-control': 'public, max-age=60' },
-			});
-		}
-
-		return env.ASSETS.fetch(request);
-	},
-
-	async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-		ctx.waitUntil(refresh(env));
-	},
-};
+/** Cron handler: refresh the cached YouTube stats. */
+export async function refreshStats(env: StatsEnv): Promise<void> {
+	await refresh(env);
+}

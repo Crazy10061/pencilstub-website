@@ -8,11 +8,17 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "preview": "astro build && wrangler dev --infer-origin-from-routes=false",
+    "astro": "astro",
+    "deploy": "astro build && wrangler deploy",
+    "types": "wrangler types"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^14.4.4",
     "astro": "^7.4.2",
     "sharp": "^0.35.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.156.2"
   }
 }
