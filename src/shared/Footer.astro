@@ -1,0 +1,96 @@
+---
+export interface Props {
+	sourceUrl?: string;
+	variant?: 'light' | 'dark' | 'minimal';
+	/** What the footer calls the thing that is open source ("This <label> is open source"). */
+	label?: string;
+}
+
+/*
+ * Per-site theming: set any of these CSS custom properties on an ancestor
+ * (e.g. :root in the site's global stylesheet) to override the variant defaults.
+ *
+ *   --footer-bg            --footer-color          --footer-border
+ *   --footer-padding       --footer-margin
+ *   --footer-font-family   --footer-font-size
+ *   --footer-link-color    --footer-link-hover     --footer-link-weight
+ *   --footer-link-decoration  --footer-link-underline-offset
+ */
+
+const defaultRepo = 'https://github.com/tomatopotato17265/website';
+
+const { sourceUrl = defaultRepo, variant = 'light', label = 'page' } = Astro.props;
+---
+
+<footer class={`footer footer--${variant}`}>
+	<p>
+		This {label} is <a href={sourceUrl} target="_blank" rel="noopener noreferrer">open source</a>.
+		Made with ❤️ by pencil stub.
+	</p>
+</footer>
+
+<style>
+	.footer {
+		/* variant defaults (private); overridable via the public --footer-* properties */
+		--_bg: transparent;
+		--_color: inherit;
+		--_border: none;
+		--_link: inherit;
+		--_link-hover: var(--_link);
+		--_link-weight: 600;
+		--_font-size: 0.9rem;
+
+		padding: var(--footer-padding, 1.25rem 1.5rem);
+		margin: var(--footer-margin, 0);
+		text-align: center;
+		font-family: var(
+			--footer-font-family,
+			Inter,
+			Roboto,
+			'Helvetica Neue',
+			'Arial Nova',
+			'Nimbus Sans',
+			Arial,
+			sans-serif
+		);
+		font-size: var(--footer-font-size, var(--_font-size));
+		background: var(--footer-bg, var(--_bg));
+		color: var(--footer-color, var(--_color));
+		border-top: var(--footer-border, var(--_border));
+	}
+
+	.footer p {
+		margin: 0;
+	}
+
+	.footer a {
+		color: var(--footer-link-color, var(--_link));
+		font-weight: var(--footer-link-weight, var(--_link-weight));
+		text-decoration: var(--footer-link-decoration, underline);
+		text-underline-offset: var(--footer-link-underline-offset, 2px);
+	}
+
+	.footer a:hover {
+		color: var(--footer-link-hover, var(--_link-hover));
+	}
+
+	.footer--light {
+		--_bg: #fff;
+		--_color: #111827;
+		--_border: 1px solid rgba(17, 24, 39, 0.1);
+		--_link: #111827;
+	}
+
+	.footer--dark {
+		--_bg: #111827;
+		--_color: #e5e7eb;
+		--_link: #fff;
+	}
+
+	.footer--minimal {
+		--_color: #6b7280;
+		--_link: inherit;
+		--_link-weight: 400;
+		--_font-size: 0.8rem;
+	}
+</style>

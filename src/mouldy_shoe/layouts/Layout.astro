@@ -1,0 +1,27 @@
+---
+import Footer from '../../shared/Footer.astro';
+import TopBar from '../../shared/TopBar.astro';
+import BaseHead from '../components/BaseHead.astro';
+import { SITE_TITLE, SOCIAL_LINKS, SOURCE_URL } from '../consts';
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={title} description={description} />
+	</head>
+	<body>
+		<TopBar variant="overlay" title={SITE_TITLE} links={SOCIAL_LINKS} />
+		<main>
+			<slot />
+			<Footer label="website" sourceUrl={SOURCE_URL} />
+		</main>
+	</body>
+</html>

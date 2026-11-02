@@ -1,0 +1,256 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../../mouldy_shoe/layouts/Layout.astro';
+import { CURRENT_RANK, RANK_TIERS, SITE_DESCRIPTION, SITE_TITLE } from '../../mouldy_shoe/consts';
+import logo from '../../mouldy_shoe/assets/favicon.png';
+
+const rankIndex = RANK_TIERS.indexOf(CURRENT_RANK);
+if (rankIndex === -1) {
+	throw new Error(
+		`CURRENT_RANK ("${CURRENT_RANK}") is not in RANK_TIERS — fix src/mouldy_shoe/consts.ts`,
+	);
+}
+---
+
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+	<div class="hero">
+		<Image src={logo} alt="Mouldy Shoe logo" width={320} height={320} class="body-logo" />
+		<h1>Mouldy Shoe</h1>
+	</div>
+	<p>Hi! I'm Mouldy Shoe.</p>
+	<p>
+		I'm an Australian creator who makes cinematic documentaries exploring the players, teams and moments that shape Rocket League.
+	</p>
+	<ul class="stats">
+		<li class="stat">
+			<a class="stat-inner" href="https://youtube.com/@mouldy_shoe" target="_blank" rel="noopener">
+				<span class="stat-value" data-stat="subscribers">—</span>
+				<span class="stat-label">Subscribers</span>
+			</a>
+		</li>
+		<li class="stat">
+			<a
+				class="stat-inner"
+				href="https://youtube.com/@mouldy_shoe/videos"
+				target="_blank"
+				rel="noopener"
+			>
+				<span class="stat-value" data-stat="videos">—</span>
+				<span class="stat-label">Videos</span>
+			</a>
+		</li>
+		<li class="stat">
+			<div class="stat-inner">
+				<span class="stat-value" data-rank-index={rankIndex}>{RANK_TIERS[0]}</span>
+				<span class="stat-label">Rank</span>
+			</div>
+		</li>
+	</ul>
+	<div class="latest-video">
+		<a
+			class="latest-video-thumb"
+			data-latest-video-link
+			href="https://youtube.com/@mouldy_shoe/videos"
+			target="_blank"
+			rel="noopener"
+			aria-label="Watch the latest video"
+		></a>
+		<div class="latest-video-text">
+			<h2>Latest video</h2>
+			<p data-latest-video-title>My latest video. Go check it out!</p>
+		</div>
+	</div>
+</Layout>
+
+
+<style>
+	.hero {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+	.body-logo {
+		display: block;
+		flex: none;
+		width: 260px;
+		height: auto;
+		border-radius: 50%;
+	}
+	.hero h1 {
+		margin: 0;
+	}
+	.stats {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 6rem;
+		margin: 2.5rem 0 0;
+		padding: 0;
+		list-style: none;
+		background: transparent;
+		text-align: center;
+	}
+	.stat {
+		background: transparent;
+	}
+	.stat-inner {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-decoration: none;
+		color: rgb(var(--black));
+		background: transparent;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.stat-value {
+		font-size: 3rem;
+		font-weight: 700;
+		line-height: 1.2;
+		color: rgb(var(--black));
+		font-variant-numeric: tabular-nums;
+	}
+	.stat-label {
+		font-size: 1.1rem;
+		color: rgb(var(--black));
+	}
+	.stat-inner:hover .stat-value {
+		color: var(--accent);
+	}
+	.latest-video {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 2rem;
+		margin-top: 3rem;
+	}
+	.latest-video-thumb {
+		display: block;
+		flex: none;
+		width: 320px;
+		max-width: 100%;
+		aspect-ratio: 16 / 9;
+		border-radius: 12px;
+		overflow: hidden;
+		background: rgb(var(--gray-light));
+	}
+	.latest-video-thumb :global(.latest-video-img) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+	.latest-video-thumb :global(.latest-video-img.loaded) {
+		opacity: 1;
+	}
+	.latest-video-text {
+		flex: 1 1 240px;
+		min-width: 0;
+	}
+	.latest-video-text h2 {
+		font-size: 1.6rem;
+		margin: 0 0 0.4rem;
+	}
+	.latest-video-text p {
+		margin: 0;
+		color: rgb(var(--gray-dark));
+	}
+</style>
+
+<script define:vars={{ rankTiers: RANK_TIERS, rankIndex }}>
+	const fmt = new Intl.NumberFormat('en', {
+		notation: 'compact',
+		maximumFractionDigits: 1,
+	});
+	const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	function animateEase(duration, render) {
+		const start = performance.now();
+		let done = false;
+		const finish = () => {
+			if (done) return;
+			done = true;
+			render(1);
+		};
+		const fallback = setTimeout(finish, duration + 250);
+		function frame(now) {
+			const t = Math.min(1, (now - start) / duration);
+			render(1 - Math.pow(1 - t, 3));
+			if (t < 1) {
+				requestAnimationFrame(frame);
+			} else {
+				clearTimeout(fallback);
+				finish();
+			}
+		}
+		requestAnimationFrame(frame);
+	}
+
+	function countUp(el, target) {
+		const final = fmt.format(target);
+		if (reduceMotion) {
+			el.textContent = final;
+			return;
+		}
+		let last = el.textContent;
+		animateEase(1200, (eased) => {
+			const next = eased >= 1 ? final : fmt.format(Math.round(target * eased));
+			if (next !== last) {
+				last = next;
+				el.textContent = next;
+			}
+		});
+	}
+
+	function stepRank(el, targetIndex) {
+		const final = rankTiers[targetIndex];
+		if (reduceMotion) {
+			el.textContent = final;
+			return;
+		}
+		let last = el.textContent;
+		animateEase(1200, (eased) => {
+			const idx = eased >= 1 ? targetIndex : Math.round(targetIndex * eased);
+			const next = rankTiers[idx];
+			if (next !== last) {
+				last = next;
+				el.textContent = next;
+			}
+		});
+	}
+
+	const rankEl = document.querySelector('[data-rank-index]');
+	if (rankEl) stepRank(rankEl, rankIndex);
+
+	fetch('/api/stats')
+		.then((r) => r.json())
+		.then((data) => {
+			document.querySelectorAll('[data-stat]').forEach((el) => {
+				const value = data[el.dataset.stat ?? ''];
+				if (typeof value === 'number') countUp(el, value);
+			});
+
+			const video = data.latestVideo;
+			const link = document.querySelector('[data-latest-video-link]');
+			if (link && video && typeof video.id === 'string' && typeof video.thumbnail === 'string') {
+				link.href = `https://www.youtube.com/watch?v=${video.id}`;
+				const img = new Image();
+				img.className = 'latest-video-img';
+				img.alt = typeof video.title === 'string' && video.title ? video.title : '';
+				img.decoding = 'async';
+				img.addEventListener('load', () => img.classList.add('loaded'));
+				img.src = video.thumbnail;
+				link.appendChild(img);
+
+				const titleEl = document.querySelector('[data-latest-video-title]');
+				if (titleEl && typeof video.title === 'string' && video.title) {
+					titleEl.textContent = video.title;
+				}
+			}
+		})
+		.catch(() => {});
+</script>
